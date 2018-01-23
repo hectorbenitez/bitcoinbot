@@ -1,5 +1,6 @@
 const express = require('express');
-var bodyParser = require('body-parser')
+const bodyParser = require('body-parser')
+const requestp = require('request-promise-native');
 
 const app = express();
 
@@ -34,29 +35,54 @@ app.get('/webhook', (req, res) => {
     }
 });
 
-app.post('/webhook', (req, res) => {  
- 
+app.post('/webhook', (req, res) => {
+
     let body = req.body;
-  
+
     // Checks this is an event from a page subscription
     if (body.object === 'page') {
-  
-      // Iterates over each entry - there may be multiple if batched
-      body.entry.forEach(function(entry) {
-  
-        // Gets the message. entry.messaging is an array, but 
-        // will only ever contain one message, so we get index 0
-        let webhook_event = entry.messaging[0];
-        console.log(webhook_event);
-      });
-  
-      // Returns a '200 OK' response to all requests
-      res.status(200).send('EVENT_RECEIVED');
+
+        // Iterates over each entry - there may be multiple if batched
+        body.entry.forEach(function (entry) {
+
+            // Gets the message. entry.messaging is an array, but 
+            // will only ever contain one message, so we get index 0
+            let webhook_event = entry.messaging[0];
+            sendFBMessage(webhook_event.sender.id);
+            console.log(webhook_event);
+        });
+
+        // Returns a '200 OK' response to all requests
+        res.status(200).send('EVENT_RECEIVED');
     } else {
-      // Returns a '404 Not Found' if event is not from a page subscription
-      res.sendStatus(404);
+        // Returns a '404 Not Found' if event is not from a page subscription
+        res.sendStatus(404);
     }
-  
-  });
+
+});
+
+function sendFBMessage(recipientId) {
+    var options = {
+        method: 'POST',
+        uri: 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAciDfyqWX0BAG84bZC9awMGolLE3pRviue7WSOEjN3yD5FSrS841kGMzgySU0uVZC5iHbFJlBiRWZAufXZBA2Q9gO5fvSVUFTVZCYy20B8JwC8Ycba7zvtM20V7jHh7TDRzdkFpi8kUbG6hzi0vej2idYgrGWoPveaMDSVAY5AZDZD',
+        body: {
+            "recipient": {
+                "id": recipientId
+            },
+            "message": {
+                "text": "hello, world!"
+            }
+        },
+        json: true // Automatically stringifies the body to JSON
+    };
+
+    requestp(options)
+        .then(function (parsedBody) {
+            // POST succeeded...
+        })
+        .catch(function (err) {
+            // POST failed...
+        });
+}
 
 app.listen(process.env.PORT || 3000, () => console.log('Example app listening on port 3000!'));
