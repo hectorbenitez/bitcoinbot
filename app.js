@@ -11,7 +11,8 @@ app.get('/', (req, res) => res.send('Hello World!'));
 app.get('/webhook', (req, res) => {
 
     // Your verify token. Should be a random string.
-    let VERIFY_TOKEN = "SECRET"
+    // It lives in BITCOIN_BOT_SECRET environment variable
+    let VERIFY_TOKEN = process.env.BITCOIN_BOT_SECRET
 
     // Parse the query params
     let mode = req.query['hub.mode'];
