@@ -64,7 +64,7 @@ app.post('/webhook', (req, res) => {
 function sendFBMessage(recipientId) {
     var options = {
         method: 'POST',
-        uri: 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAciDfyqWX0BAG84bZC9awMGolLE3pRviue7WSOEjN3yD5FSrS841kGMzgySU0uVZC5iHbFJlBiRWZAufXZBA2Q9gO5fvSVUFTVZCYy20B8JwC8Ycba7zvtM20V7jHh7TDRzdkFpi8kUbG6hzi0vej2idYgrGWoPveaMDSVAY5AZDZD',
+        uri: `https://graph.facebook.com/v2.6/me/messages?access_token=${process.env.FB_PAGE_TOKEN}`,
         body: {
             "recipient": {
                 "id": recipientId
