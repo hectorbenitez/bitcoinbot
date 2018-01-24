@@ -83,8 +83,8 @@ function sendFBMessage(recipientId, text) {
         .then(function (parsedBody) {
             // POST succeeded...
         })
-        .catch(function (err) {
-            // POST failed...
+        .catch(function (error) {
+            console.log(error);
         });
 }
 
@@ -103,8 +103,8 @@ function checkLUIS(question) {
         .then(function (parsedBody) {
             return parsedBody.Answer;
         })
-        .catch(function (err) {
-            // POST failed...
+        .catch(function (error) {
+            console.log(error);
         });
 }
 
