@@ -49,7 +49,9 @@ app.post('/webhook', (req, res) => {
             // Gets the message. entry.messaging is an array, but 
             // will only ever contain one message, so we get index 0
             let webhook_event = entry.messaging[0];
-            sendFBMessage(webhook_event.sender.id);
+            checkLUIS(webhook_event.message.text).then(answer => {
+                sendFBMessage(webhook_event.sender.id, answer);
+            });
             console.log(webhook_event);
         });
 
@@ -62,7 +64,7 @@ app.post('/webhook', (req, res) => {
 
 });
 
-function sendFBMessage(recipientId) {
+function sendFBMessage(recipientId, text) {
     var options = {
         method: 'POST',
         uri: `https://graph.facebook.com/v2.6/me/messages?access_token=${process.env.FB_PAGE_TOKEN}`,
@@ -71,7 +73,7 @@ function sendFBMessage(recipientId) {
                 "id": recipientId
             },
             "message": {
-                "text": "hello, world!"
+                "text": text
             }
         },
         json: true // Automatically stringifies the body to JSON
@@ -80,6 +82,26 @@ function sendFBMessage(recipientId) {
     requestp(options)
         .then(function (parsedBody) {
             // POST succeeded...
+        })
+        .catch(function (err) {
+            // POST failed...
+        });
+}
+
+function checkLUIS(question) {
+    var options = {
+        method: 'POST',
+        headers: {
+            'Ocp-Apim-Subscription-Key': process.env.MS_KB_KEY
+          },
+        uri: `https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/${process.env.MS_KB_ID}/generateAnswer`,
+        body: { question },
+        json: true // Automatically stringifies the body to JSON
+    };
+
+    return requestp(options)
+        .then(function (parsedBody) {
+            return parsedBody.Answer;
         })
         .catch(function (err) {
             // POST failed...
