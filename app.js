@@ -103,7 +103,7 @@ function checkLUIS(question) {
     return requestp(options)
         .then(function (parsedBody) {
             console.log(parsedBody)
-            return parsedBody.Answer;
+            return parsedBody.answers[0].answer;
         })
         .catch(function (error) {
             console.log(error);
