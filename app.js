@@ -89,6 +89,7 @@ function sendFBMessage(recipientId, text) {
 }
 
 function checkLUIS(question) {
+    console.log('Question', question);
     var options = {
         method: 'POST',
         headers: {
@@ -101,6 +102,7 @@ function checkLUIS(question) {
 
     return requestp(options)
         .then(function (parsedBody) {
+            console.log(parsedBody)
             return parsedBody.Answer;
         })
         .catch(function (error) {
