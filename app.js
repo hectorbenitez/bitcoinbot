@@ -1,5 +1,5 @@
 const express = require('express');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 const requestp = require('request-promise-native');
 
 const app = express();
@@ -50,7 +50,15 @@ app.post('/webhook', (req, res) => {
             // will only ever contain one message, so we get index 0
             let webhook_event = entry.messaging[0];
             checkLUIS(webhook_event.message.text).then(answer => {
-                sendFBMessage(webhook_event.sender.id, answer);
+                if (answer === 'price') {
+                    sendFBMessage(webhook_event.sender.id, 'Wait a second, let me take a look...');
+                    getBTCPrice().then(priceData => {
+                        const btcPriceAnswer = `$ ${priceData.bpi.USD.rate} USD, Updated: ${priceData.time.updated}. ${priceData.disclaimer}`;
+                        sendFBMessage(webhook_event.sender.id, btcPriceAnswer);
+                    });
+                } else {
+                    sendFBMessage(webhook_event.sender.id, answer);
+                }
             });
             console.log(webhook_event);
         });
@@ -65,7 +73,7 @@ app.post('/webhook', (req, res) => {
 });
 
 function sendFBMessage(recipientId, text) {
-    var options = {
+    const options = {
         method: 'POST',
         uri: `https://graph.facebook.com/v2.6/me/messages?access_token=${process.env.FB_PAGE_TOKEN}`,
         body: {
@@ -80,9 +88,6 @@ function sendFBMessage(recipientId, text) {
     };
 
     requestp(options)
-        .then(function (parsedBody) {
-            // POST succeeded...
-        })
         .catch(function (error) {
             console.log(error);
         });
@@ -90,7 +95,7 @@ function sendFBMessage(recipientId, text) {
 
 function checkLUIS(question) {
     console.log('Question', question);
-    var options = {
+    const options = {
         method: 'POST',
         headers: {
             'Ocp-Apim-Subscription-Key': process.env.MS_KB_KEY
@@ -108,6 +113,15 @@ function checkLUIS(question) {
         .catch(function (error) {
             console.log(error);
         });
+}
+
+function getBTCPrice() {
+    const options = {
+        method: 'GET',
+        uri: 'https://api.coindesk.com/v1/bpi/currentprice.json',
+        json: true // Automatically stringifies the body to JSON
+    };
+    return requestp(options);
 }
 
 app.listen(process.env.PORT || 3000, () => console.log('Example app listening on port 3000!'));
