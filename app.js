@@ -51,11 +51,12 @@ app.post('/webhook', (req, res) => {
             let webhook_event = entry.messaging[0];
             checkLUIS(webhook_event.message.text).then(answer => {
                 if (answer === 'price') {
-                    sendFBMessage(webhook_event.sender.id, 'Wait a second, let me take a look...');
-                    getBTCPrice().then(priceData => {
-                        const btcPriceAnswer = `$ ${priceData.bpi.USD.rate} USD, Updated: ${priceData.time.updated}. This data was produced from the CoinDesk Bitcoin Price Index (USD).`;
-                        sendFBMessage(webhook_event.sender.id, btcPriceAnswer);
-                    });
+                    sendFBMessage(webhook_event.sender.id, 'Wait a second, let me take a look...')
+                        .then(getBTCPrice)
+                        .then(priceData => {
+                            const btcPriceAnswer = `$ ${priceData.bpi.USD.rate} USD, Updated: ${priceData.time.updated}. This data was produced from the CoinDesk Bitcoin Price Index (USD).`;
+                            sendFBMessage(webhook_event.sender.id, btcPriceAnswer);
+                        });
                 } else {
                     sendFBMessage(webhook_event.sender.id, answer);
                 }
