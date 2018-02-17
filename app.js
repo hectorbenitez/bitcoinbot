@@ -50,15 +50,25 @@ app.post('/webhook', (req, res) => {
             // will only ever contain one message, so we get index 0
             let webhook_event = entry.messaging[0];
             checkLUIS(webhook_event.message.text).then(answer => {
-                if (answer === 'price') {
-                    sendFBMessage(webhook_event.sender.id, 'Wait a second, let me take a look...')
-                        .then(getBTCPrice)
-                        .then(priceData => {
-                            const btcPriceAnswer = `$ ${priceData.bpi.USD.rate} USD, Updated: ${priceData.time.updated}. This data was produced from the CoinDesk Bitcoin Price Index (USD).`;
-                            sendFBMessage(webhook_event.sender.id, btcPriceAnswer);
-                        });
-                } else {
-                    sendFBMessage(webhook_event.sender.id, answer);
+                switch(answer) {
+                    case 'price':
+                        sendFBMessage(webhook_event.sender.id, 'Wait a second, let me take a look...')
+                            .then(getBTCPrice)
+                            .then(priceData => {
+                                const btcPriceAnswer = `$ ${priceData.bpi.USD.rate} USD, Updated: ${priceData.time.updated}. This data was produced from the CoinDesk Bitcoin Price Index (USD).`;
+                                sendFBMessage(webhook_event.sender.id, btcPriceAnswer);
+                            });
+                        break;
+                    case 'help':
+                        const helpMessage = 'Hey, I can talk with you about BTC. What it is? What is the current price? How it works? Give a try and I will try to help you ;)';
+                        sendFBMessage(webhook_event.sender.id, helpMessage);
+                        break;
+                    case 'No good match found in the KB':
+                        const noMatchMessage = 'Sorry :( I don\'t know how to answer that... please try again with a different question about BTC or try reformulating your question.';
+                        sendFBMessage(webhook_event.sender.id, noMatchMessage);
+                        break;
+                    default:
+                        sendFBMessage(webhook_event.sender.id, answer);
                 }
             });
             console.log(webhook_event);
