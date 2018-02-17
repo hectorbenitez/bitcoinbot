@@ -88,7 +88,7 @@ function sendFBMessage(recipientId, text) {
         json: true // Automatically stringifies the body to JSON
     };
 
-    requestp(options)
+    return requestp(options)
         .catch(function (error) {
             console.log(error);
         });
